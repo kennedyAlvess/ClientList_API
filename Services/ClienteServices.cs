@@ -1,6 +1,7 @@
 using ClientListApi.Data;
 using ClientListApi.Dto;
 using ClientListApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClientListApi.Services
 {
@@ -26,19 +27,21 @@ namespace ClientListApi.Services
         {
             try
             {
-                ClienteModel cliente = new();
-                cliente.Nome = model.Nome;
-                cliente.Telefone = model.Telefone;
-                cliente.Status = model.Status;
-                cliente.DataNascimento = model.DataNascimento;
-                cliente.Cep = model.Cep;
-                cliente.Endereco = model.Endereco;
-                cliente.NumeroEndereco = model.NumeroEndereco;
-                cliente.Complementeo = model.Complementeo?? "";
-                cliente.Bairro = model.Bairro;
-                cliente.Cidade = model.Cidade;
-                cliente.Estado = model.Estado;
-                cliente.VendedorId = model.Id;
+                ClienteModel cliente = new()
+                {
+                    Nome = model.Nome,
+                    Telefone = model.Telefone,
+                    Status = model.Status,
+                    DataNascimento = model.DataNascimento,
+                    Cep = model.Cep,
+                    Endereco = model.Endereco,
+                    NumeroEndereco = model.NumeroEndereco,
+                    Complementeo = model.Complementeo ?? "",
+                    Bairro = model.Bairro,
+                    Cidade = model.Cidade,
+                    Estado = model.Estado,
+                    VendedorId = model.VendedorId
+                };
 
                 _context.Clientes.Add(cliente);
                 await _context.SaveChangesAsync();
@@ -47,7 +50,7 @@ namespace ClientListApi.Services
             }
             catch (Exception ex)
             {
-                throw new ArgumentException(ex.InnerException?.Message ?? "Erro ao adicionar cliente.");
+                throw new Exception("Erro ao adicionar cliente.", ex);
             }
         }
 
@@ -55,28 +58,90 @@ namespace ClientListApi.Services
         {
             try
             {
-                var cliente = await _context.Clientes.FindAsync(model.Id);
+                var cliente = await _context.Clientes.Where(x => x.Id == model.Id)
+                                                     .ExecuteUpdateAsync(set =>
+                                                        set.SetProperty(x => x.Nome, model.Nome)
+                                                        .SetProperty(x => x.Telefone, model.Telefone)
+                                                        .SetProperty(x => x.Status, model.Status)
+                                                        .SetProperty(x => x.DataNascimento, model.DataNascimento)
+                                                        .SetProperty(x => x.Cep, model.Cep)
+                                                        .SetProperty(x => x.Endereco, model.Endereco)
+                                                        .SetProperty(x => x.NumeroEndereco, model.NumeroEndereco)
+                                                        .SetProperty(x => x.Complementeo, model.Complementeo)
+                                                        .SetProperty(x => x.Bairro, model.Bairro)
+                                                        .SetProperty(x => x.Cidade, model.Cidade)
+                                                        .SetProperty(x => x.Estado, model.Estado)
+                                                        .SetProperty(x => x.VendedorId, model.VendedorId)
+                                                     );
 
-                
-                //_context.Update(cliente);
-                //await _context.SaveChangesAsync();
-                
-                return model;
+                return cliente == 0 ? throw new ArgumentException("Falha ao tentar atualizar dados do cliente.") 
+                                    : await BuscarClienteById(model.Id);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.InnerException?.Message ?? "Erro ao atualizar cliente.");
+                throw new Exception(ex.InnerException?.Message?? "Erro ao atualizar cliente.", ex);
             }
         }
 
-        public Task<ClienteDto> BuscarClienteById(long id)
+        public async Task<ClienteDto> BuscarClienteById(long id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var cliente = await _context.Clientes.Where(x => x.Id == id)
+                                               .Include(x => x.Vendedor)
+                                               .FirstOrDefaultAsync() ?? throw new ArgumentException("Cliente não encontrado.");
+                
+                return new ClienteDto{
+                    Nome = cliente.Nome,
+                    Telefone = cliente.Telefone,
+                    Status = cliente.Status,
+                    DataNascimento = cliente.DataNascimento,
+                    Cep = cliente.Cep,
+                    Endereco = cliente.Endereco,
+                    NumeroEndereco = cliente.NumeroEndereco,
+                    Complementeo = cliente.Complementeo?? "",
+                    Bairro = cliente.Bairro,
+                    Cidade = cliente.Cidade,
+                    Estado = cliente.Estado,
+                    Vendedor = cliente.Vendedor.Nome
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.InnerException?.Message?? "Erro ao buscar cliente.", ex);
+            }
         }
 
-        public Task<List<ClienteDto>> ListarClientes()
+        public async Task<List<ClienteDto>> ListarClientes()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var clientes = await _context.Clientes.Select(x => new ClienteDto
+                {
+                    Nome = x.Nome,
+                    Telefone = x.Telefone,
+                    Status = x.Status,
+                    DataNascimento = x.DataNascimento,
+                    Cep = x.Cep,
+                    Endereco = x.Endereco,
+                    NumeroEndereco = x.NumeroEndereco,
+                    Complementeo = x.Complementeo?? "",
+                    Bairro = x.Bairro,
+                    Cidade = x.Cidade,
+                    Estado = x.Estado,
+                    Vendedor = x.Vendedor.Nome
+                }).AsNoTracking().ToListAsync();
+
+                if (clientes.Count == 0)
+                    throw new ArgumentException("Nenhum cliente encontrado.");
+
+                return clientes;
+            }
+            catch (Exception ex)
+            {
+                
+                throw new Exception(ex.InnerException?.Message?? "Erro ao listar clientes.", ex);
+            }
         }
 
         public Task<ClienteDto> RemoverCliente(long id)
