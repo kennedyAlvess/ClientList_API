@@ -1,9 +1,13 @@
 using ClientListApi.Dto;
 using ClientListApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClientListApi.Controllers
 {
+    [Route("api/")]
+    [ApiController]
+    [Authorize]
     public class ClienteController : ControllerBase
     {
         private readonly IClienteServices _clienteServices;
