@@ -37,5 +37,32 @@ namespace ClientListApi.Dto
                 VendedorId = this.VendedorId
             };
         }
+
+        public ClienteModel ToClienteModel(ClienteDto Cliente)
+        {
+            return new ClienteModel
+            {
+                Id = Cliente.Id,
+                Nome = Cliente.Nome,
+                Telefone = Cliente.Telefone,
+                Status = Cliente.Status,
+                DataNascimento = Cliente.DataNascimento,
+                Cep = Cliente.Cep,
+                Endereco = Cliente.Endereco,
+                NumeroEndereco = Cliente.NumeroEndereco,
+                Complementeo = Cliente.Complementeo ?? "",
+                Bairro = Cliente.Bairro,
+                Cidade = Cliente.Cidade,
+                Estado = Cliente.Estado,
+                VendedorId = Cliente.VendedorId
+            };
+        }
+    }
+
+
+    public class ResponseDto
+    {
+        public required string Message { get; set; }
+        public IEnumerable<string> Errors { get; set; } = [];
     }
 }

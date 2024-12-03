@@ -64,7 +64,11 @@ namespace ClientListApi.Controllers
         {
             try
             {
-                return Ok(await _clienteServices.AdicionarCliente(cliente));
+                var adicionarCliente = await _clienteServices.AdicionarCliente(cliente);
+                if (adicionarCliente.Errors.Any())
+                    return BadRequest(adicionarCliente);
+
+                return Ok(adicionarCliente);
             }
             catch (Exception ex)
             {
