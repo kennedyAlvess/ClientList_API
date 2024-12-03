@@ -20,7 +20,7 @@ namespace ClientListApi.Services
         }
         public async Task<object> Login(LoginDto user)
         {
-            var vendedor = await _context.Vendedores.Where(x => x.Nome == user.Nome && x.Senha == user.Senha)
+            var vendedor = await _context.Vendedores.Where(x => x.CPF == user.CPF && x.Senha == user.Senha)
                                                 .AsNoTracking()
                                                 .FirstOrDefaultAsync() 
                                                 ?? throw new Exception("Usuário ou senha inválidos");

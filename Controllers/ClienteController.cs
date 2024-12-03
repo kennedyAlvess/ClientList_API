@@ -7,7 +7,7 @@ namespace ClientListApi.Controllers
 {
     [Route("api/")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ClienteController : ControllerBase
     {
         private readonly IClienteServices _clienteServices;
@@ -15,7 +15,49 @@ namespace ClientListApi.Controllers
         public ClienteController(IClienteServices clienteServices)
         {
             _clienteServices = clienteServices;
-        }   
+        }
+
+
+        [HttpGet("ListarClientes")]
+        public async Task<IActionResult> ListarClientes(long vendedorId)
+        {
+            try
+            {
+                var clientes = await _clienteServices.ListarClientes(vendedorId);
+                if (clientes.Count == 0)
+                    return NotFound(new
+                    {
+                        message = "Não há clientes cadastrados para o vendedor informado."
+                    });
+
+                return Ok(clientes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("ClienteById/{id}")]
+        public async Task<IActionResult> BuscarClienteById(long id)
+        {
+            try
+            {
+                var cliente = await _clienteServices.BuscarClienteById(id);
+
+                if (cliente is null)
+                    return NotFound(new 
+                    {
+                        message = "Cliente não encontrado."
+                    });
+
+                return Ok(cliente);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpPost("AdicionarCliente")]
         public async Task<IActionResult> AdicionarCliente([FromBody] ClienteDto cliente)
@@ -43,25 +85,12 @@ namespace ClientListApi.Controllers
             }
         }
 
-        [HttpGet("ClienteById/{id}")]
-        public async Task<IActionResult> BuscarClienteById(long id)
+        [HttpDelete("RemoverCliente/{id}")]
+        public async Task<IActionResult> RemoverCliente(long id)
         {
             try
             {
-                return Ok(await _clienteServices.BuscarClienteById(id));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("ListarClientes")]
-        public async Task<IActionResult> ListarClientes()
-        {
-            try
-            {
-                return Ok(await _clienteServices.ListarClientes());
+                return Ok(await _clienteServices.RemoverCliente(id) is true ? "Cliente removido com sucesso." : "Cliente não encontrado.");
             }
             catch (Exception ex)
             {
