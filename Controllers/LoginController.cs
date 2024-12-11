@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ClientListApi.Controllers
 {
+    [ApiController]
     public class LoginController : ControllerBase
     {
         private readonly ILoginServices _loginServices;
@@ -15,7 +16,7 @@ namespace ClientListApi.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginDto user)
+        public async Task<IActionResult> Login([FromBody] LoginDto user)
         {
             try
             {
