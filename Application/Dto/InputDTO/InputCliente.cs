@@ -2,7 +2,7 @@ using ClientListApi.Models;
 
 namespace ClientListApi.Application.Dto.InputDTO
 {
-    public class ClienteDto
+    public class InputCliente
     {
         public long Id { get; set; }
         public string Nome { get; set; } = "";
@@ -18,7 +18,7 @@ namespace ClientListApi.Application.Dto.InputDTO
         public string? Complementeo { get; set; }
         public long VendedorId { get; set; }
 
-        public ClienteModel ToClienteModel(ClienteDto Cliente)
+        public ClienteModel ToClienteModel(InputCliente Cliente)
         {
             return new ClienteModel
             {

@@ -1,6 +1,7 @@
 using ClientListApi.Application.Services;
+using ClientListApi.Domain.Repositories;
+using ClientListApi.Infrastructure.Repository;
 using ClientListApi.Security;
-using ClientListApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClientListApi.Infrastructure.Config
@@ -33,8 +34,9 @@ namespace ClientListApi.Infrastructure.Config
         public static IServiceCollection AddDependecyInjection(this IServiceCollection services)
         {
             services.AddScoped<IClienteServices, ClienteServices>();
-            services.AddScoped<ILoginServices, LoginServices>();
+            //services.AddScoped<ILoginServices, LoginServices>();
             services.AddScoped<ITokenActions, TokenActions>();
+            services.AddScoped<IClienteRepository, ClienteRepository>();
 
             return services;
         }

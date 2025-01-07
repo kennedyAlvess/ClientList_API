@@ -17,6 +17,4 @@ namespace ClientListApi.Application.Dto.ResponseDTO
         public string Estado { get; set; } = model.Estado;
         public string? Complementeo { get; set; } = model.Complementeo;
     }
-
-
 }
