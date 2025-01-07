@@ -1,4 +1,4 @@
-namespace ClientListApi.Dto
+namespace ClientListApi.Application.Dto.InputDTO
 {
     public class LoginDto
     {

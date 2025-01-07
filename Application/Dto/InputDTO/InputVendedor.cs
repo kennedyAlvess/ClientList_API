@@ -1,6 +1,6 @@
 using ClientListApi.Models;
 
-namespace ClientListApi.Dto
+namespace ClientListApi.Application.Dto.InputDTO
 {
     public class VendedorDto
     {

@@ -1,7 +1,7 @@
 using ClientListApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClientListApi.Data
+namespace ClientListApi.Infrastructure
 {
     public class AppDbContext : DbContext
     {
