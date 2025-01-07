@@ -1,20 +1,17 @@
 using System.Text;
-using ClientListApi.Data;
-using ClientListApi.Security;
-using ClientListApi.Services;
-using ClientListApi.Utils;
+using ClientListApi.Application.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using ClientListApi.Infrastructure.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddInfra();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -64,14 +61,16 @@ builder.Services.Configure<JwtSettings>(options =>
     builder.Configuration.GetSection("JwtSettings").Bind(options);
 });
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddCors(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
 });
-
-builder.Services.AddScoped<IClienteServices, ClienteServices>();
-builder.Services.AddScoped<ILoginServices, LoginServices>();
-builder.Services.AddScoped<ITokenActions, TokenActions>();
 
 var app = builder.Build();
 
@@ -86,8 +85,8 @@ if (app.Environment.IsDevelopment())
 }
 
 
-
 app.UseHttpsRedirection();
+app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

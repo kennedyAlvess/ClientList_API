@@ -1,4 +1,4 @@
-namespace ClientListApi.Utils
+namespace ClientListApi.Application.Utils
 {
     public class JwtSettings
     {

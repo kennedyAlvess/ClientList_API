@@ -1,6 +1,6 @@
 using ClientListApi.Models;
 
-namespace ClientListApi.Dto
+namespace ClientListApi.Application.Dto.InputDTO
 {
     public class ClienteDto
     {
@@ -18,9 +18,9 @@ namespace ClientListApi.Dto
         public string? Complementeo { get; set; }
         public long VendedorId { get; set; }
 
-        public ClienteDto ToClienteDTO(ClienteModel Cliente)
+        public ClienteModel ToClienteModel(ClienteDto Cliente)
         {
-            return new ClienteDto
+            return new ClienteModel
             {
                 Id = Cliente.Id,
                 Nome = Cliente.Nome,
@@ -34,7 +34,7 @@ namespace ClientListApi.Dto
                 Bairro = Cliente.Bairro,
                 Cidade = Cliente.Cidade,
                 Estado = Cliente.Estado,
-                VendedorId = this.VendedorId
+                VendedorId = Cliente.VendedorId
             };
         }
     }

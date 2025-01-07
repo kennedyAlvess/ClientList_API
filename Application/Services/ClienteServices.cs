@@ -1,30 +1,31 @@
-using ClientListApi.Data;
-using ClientListApi.Dto;
-using ClientListApi.Models;
+using System.Reflection;
+using ClientListApi.Application.Dto.InputDTO;
+using ClientListApi.Application.Dto.ResponseDTO;
+using ClientListApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClientListApi.Services
+namespace ClientListApi.Application.Services
 {
     public interface IClienteServices
     {
-        Task<List<ClienteDto>> ListarClientes(long vendedorId);
-        Task<ClienteDto?> BuscarClienteById(long id);
-        Task<Boolean> RemoverCliente(long id);
-        Task<ClienteDto> AtualizarCliente(ClienteDto cliente);
-        Task<ClienteDto> AdicionarCliente(ClienteDto cliente);
+        Task<List<ResponseCliente>> ListarClientes(long vendedorId);
+        Task<ResponseCliente?> BuscarClienteById(long id);
+        Task<bool> RemoverCliente(long id);
+        Task<ResponseCliente> AtualizarCliente(ClienteDto cliente);
+        Task<string> AdicionarCliente(ClienteDto cliente);
     }
 
     public class ClienteServices(AppDbContext context) : IClienteServices
     {
         private readonly AppDbContext _context = context;
-        readonly ClienteDto converter = new();
+        readonly ClienteDto converterToModel = new();
 
-        public async Task<List<ClienteDto>> ListarClientes(long vendedorId)
+        public async Task<List<ResponseCliente>> ListarClientes(long vendedorId)
         {
             try
             {
                 var clientes = await _context.Clientes.Where(x => x.VendedorId == vendedorId)
-                                                        .Select(cliente => converter.ToClienteDTO(cliente))
+                                                        .Select(x => new ResponseCliente(x))
                                                         .AsNoTracking()
                                                         .ToListAsync();
 
@@ -32,11 +33,12 @@ namespace ClientListApi.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Erro ao listar clientes.", ex);
+                Console.WriteLine(ex.Message); //Medida provisoria para logs
+                throw new Exception("Erro ao listar clientes.");
             }
         }
 
-        public async Task<ClienteDto?> BuscarClienteById(long id)
+        public async Task<ResponseCliente?> BuscarClienteById(long id)
         {
             try
             {
@@ -47,15 +49,32 @@ namespace ClientListApi.Services
                 if (cliente is null)
                     return null;
                 
-                return converter.ToClienteDTO(cliente);
+                return new ResponseCliente(cliente);
             }
             catch (Exception ex)
             {
-                throw new Exception("Erro ao buscar Cliente", ex);
+                Console.WriteLine(ex.Message); //Medida provisoria para logs
+                throw new Exception("Erro ao buscar cliente.");
             }
         }
 
-        public async Task<ClienteDto> AtualizarCliente(ClienteDto model)
+        public async Task<string> AdicionarCliente(ClienteDto model)
+        {
+            try
+            {
+                _context.Clientes.Add(converterToModel.ToClienteModel(model));
+                await _context.SaveChangesAsync();
+
+                return "Cliente adicionado com sucesso.";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message); //Medida provisoria para logs
+                throw new Exception("Erro ao adicionar cliente.");
+            }
+        }
+
+        public async Task<ResponseCliente> AtualizarCliente(ClienteDto model)
         {
             try
             {
@@ -83,40 +102,8 @@ namespace ClientListApi.Services
                 throw new Exception(ex.InnerException?.Message ?? "Erro ao atualizar cliente.", ex);
             }
         }
-        public async Task<ClienteDto> AdicionarCliente(ClienteDto model)
-        {
-            try
-            {
 
-
-                ClienteModel cliente = new()
-                {
-                    Nome = model.Nome,
-                    Telefone = model.Telefone,
-                    Status = model.Status,
-                    DataNascimento = model.DataNascimento,
-                    Cep = model.Cep,
-                    Endereco = model.Endereco,
-                    NumeroEndereco = model.NumeroEndereco,
-                    Complementeo = model.Complementeo ?? "",
-                    Bairro = model.Bairro,
-                    Cidade = model.Cidade,
-                    Estado = model.Estado,
-                    VendedorId = model.VendedorId
-                };
-
-                _context.Clientes.Add(cliente);
-                await _context.SaveChangesAsync();
-
-                return model;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Erro ao adicionar cliente." + ex.Message, ex);
-            }
-        }
-
-        public async Task<Boolean> RemoverCliente(long id)
+        public async Task<bool> RemoverCliente(long id)
         {
             try
             {
@@ -133,5 +120,6 @@ namespace ClientListApi.Services
                 throw new Exception(ex.InnerException?.Message ?? "Erro ao remover cliente.", ex);
             }
         }
+    
     }
 }
